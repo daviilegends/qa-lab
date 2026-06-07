@@ -34,6 +34,9 @@ export default function Header() {
           <Link href="/products" className="transition-colors hover:text-brand-700">
             Products
           </Link>
+          <Link href="/doc" className="transition-colors hover:text-brand-700" data-testid="nav-doc-link">
+            Doc
+          </Link>
           <Link
             href="/cart"
             className="flex items-center gap-1.5 transition-colors hover:text-brand-700"
