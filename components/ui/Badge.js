@@ -1,6 +1,6 @@
 const TONE_CLASSES = {
   neutral: "bg-zinc-100 text-zinc-700",
-  success: "bg-green-100 text-green-800",
+  success: "bg-brand-100 text-brand-900",
   warning: "bg-amber-100 text-amber-800",
   danger: "bg-red-100 text-red-800",
 };

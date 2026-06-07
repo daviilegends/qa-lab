@@ -37,9 +37,12 @@ export default function ProductListPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900">Products</h1>
-        <p className="mt-1 text-sm text-zinc-600">Browse the dummy catalog used for QA automation practice.</p>
+      <div className="rounded-2xl bg-brand-900 px-6 py-8 text-white sm:px-10 sm:py-10">
+        <h1 className="font-heading text-2xl font-semibold sm:text-3xl">Browse the catalog</h1>
+        <p className="mt-2 max-w-xl text-sm text-brand-100">
+          A predictable dummy product catalog — search, filter and sort to find products in stock,
+          on sale or available for subscription.
+        </p>
       </div>
 
       <form className="flex flex-col gap-4 sm:flex-row sm:items-end" role="search" aria-label="Product search and filters">

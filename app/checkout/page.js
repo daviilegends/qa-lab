@@ -138,7 +138,7 @@ export default function CheckoutPage() {
           ) : null}
         </section>
 
-        <Button type="submit" disabled={isPlacingOrder} data-testid="place-order-button">
+        <Button type="submit" variant="cta" disabled={isPlacingOrder} data-testid="place-order-button">
           {isPlacingOrder ? "Placing order…" : "Place order"}
         </Button>
       </form>

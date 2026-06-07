@@ -69,7 +69,7 @@ test.describe("Add to cart @cart", () => {
     await pdp.addToCart();
 
     await expect(pdp.feedback).toHaveText("Added 2 x Wireless Headphones to your cart.");
-    await expect(page.getByTestId("nav-cart-link")).toContainText("Cart (2)");
+    await expect(page.getByTestId("cart-count-badge")).toHaveText("2");
   });
 
   test("out-of-stock products cannot be added to cart", async ({ page }) => {

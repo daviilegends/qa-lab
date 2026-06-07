@@ -6,7 +6,7 @@ export default function Input({ id, label, error, className = "", ...props }) {
       </label>
       <input
         id={id}
-        className={`rounded-md border px-3 py-2 text-sm text-zinc-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-500 ${
+        className={`rounded-md border px-3 py-2 text-sm text-zinc-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${
           error ? "border-red-500" : "border-zinc-300"
         } ${className}`}
         aria-invalid={Boolean(error)}

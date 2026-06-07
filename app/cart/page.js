@@ -133,7 +133,7 @@ export default function CartPage() {
         <CouponForm onApply={handleApplyCoupon} message={couponMessage} />
         <CartSummary subtotal={subtotal} discount={discount} shipping={shipping} total={total} />
         <Link href="/checkout" data-testid="checkout-link">
-          <Button type="button" className="w-full" disabled={activeLines.length === 0}>
+          <Button type="button" variant="cta" className="w-full" disabled={activeLines.length === 0}>
             Continue to checkout
           </Button>
         </Link>

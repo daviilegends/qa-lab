@@ -80,7 +80,7 @@ export default function ProductDetailsPage({ params }) {
             />
           </div>
 
-          <Button type="button" onClick={handleAddToCart} disabled={isOutOfStock} data-testid="add-to-cart-button">
+          <Button type="button" variant="cta" onClick={handleAddToCart} disabled={isOutOfStock} data-testid="add-to-cart-button">
             {isOutOfStock ? "Out of stock" : "Add to cart"}
           </Button>
         </div>

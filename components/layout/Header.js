@@ -17,27 +17,42 @@ export default function Header() {
   return (
     <header className="border-b border-zinc-200 bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <Link href="/products" className="text-lg font-semibold text-zinc-900">
-          MiniCommerce QA Lab
+        <Link href="/products" className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 font-heading text-base font-semibold text-white">
+            M
+          </span>
+          <span className="font-heading text-lg font-semibold text-zinc-900">MiniCommerce QA Lab</span>
         </Link>
 
-        <nav aria-label="Main navigation" className="flex items-center gap-4 text-sm font-medium text-zinc-700">
-          <Link href="/products" className="hover:text-zinc-900">
+        <nav aria-label="Main navigation" className="flex items-center gap-5 text-sm font-medium text-zinc-600">
+          <Link href="/products" className="transition-colors hover:text-brand-700">
             Products
           </Link>
-          <Link href="/cart" className="hover:text-zinc-900" data-testid="nav-cart-link">
-            Cart{cartCount > 0 ? ` (${cartCount})` : ""}
+          <Link
+            href="/cart"
+            className="flex items-center gap-1.5 transition-colors hover:text-brand-700"
+            data-testid="nav-cart-link"
+          >
+            Cart
+            {cartCount > 0 ? (
+              <span
+                className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-cta-500 px-1 text-xs font-semibold text-white"
+                data-testid="cart-count-badge"
+              >
+                {cartCount}
+              </span>
+            ) : null}
           </Link>
 
           {currentUser ? (
             <>
-              <Link href="/account" className="hover:text-zinc-900" data-testid="nav-account-link">
+              <Link href="/account" className="transition-colors hover:text-brand-700" data-testid="nav-account-link">
                 {currentUser.name}
               </Link>
               <button
                 type="button"
                 onClick={signOut}
-                className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 hover:bg-zinc-50"
+                className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 transition-colors hover:border-brand-600 hover:text-brand-700"
                 data-testid="logout-button"
               >
                 Log out
@@ -46,7 +61,7 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 hover:bg-zinc-50"
+              className="rounded-md bg-brand-600 px-3 py-1.5 text-white transition-colors hover:bg-brand-700"
               data-testid="nav-login-link"
             >
               Log in
