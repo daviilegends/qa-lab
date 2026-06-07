@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import StockBadge from "@/components/product/StockBadge";
 import Badge from "@/components/ui/Badge";
@@ -13,8 +14,14 @@ export default function ProductCard({ product }) {
       data-testid="product-card"
       aria-label={product.name}
     >
-      <div className="flex h-40 items-center justify-center rounded-lg bg-brand-50 text-sm font-medium text-brand-700">
-        {product.name}
+      <div className="relative h-40 overflow-hidden rounded-lg bg-brand-50">
+        <Image
+          src={product.image}
+          alt={product.name}
+          fill
+          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+          className="object-cover"
+        />
       </div>
 
       <div className="flex items-center justify-between">

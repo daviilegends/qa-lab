@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
@@ -18,9 +19,14 @@ export default function Header() {
     <header className="border-b border-zinc-200 bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <Link href="/products" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 font-heading text-base font-semibold text-white">
-            M
-          </span>
+          <Image
+            src="/brand/logo-mark.svg"
+            alt="MiniCommerce QA Lab logo"
+            width={36}
+            height={36}
+            className="h-9 w-9 rounded-lg"
+            priority
+          />
           <span className="font-heading text-lg font-semibold text-zinc-900">MiniCommerce QA Lab</span>
         </Link>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Button from "@/components/ui/Button";
 import StockBadge from "@/components/product/StockBadge";
@@ -36,8 +37,15 @@ export default function ProductDetailsPage({ params }) {
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-      <div className="flex h-80 items-center justify-center rounded-lg bg-zinc-100 text-sm text-zinc-400">
-        {product.name} image
+      <div className="relative h-80 overflow-hidden rounded-lg bg-zinc-100">
+        <Image
+          src={product.image}
+          alt={product.name}
+          fill
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          className="object-cover"
+          priority
+        />
       </div>
 
       <div className="flex flex-col gap-4">

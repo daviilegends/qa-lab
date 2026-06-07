@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -84,11 +85,14 @@ export default function CheckoutPage() {
     const orderNumber = generateOrderNumber();
     const loyaltyPointsEarned = calculateLoyaltyPoints({ user: currentUser, orderTotal: total, orderDate });
 
+    const itemsSummary = cartLines.map((line) => `${line.productId}:${line.quantity}`).join(",");
+
     clearCart();
     const params = new URLSearchParams({
       orderNumber,
       total: total.toFixed(2),
       points: String(loyaltyPointsEarned),
+      items: itemsSummary,
     });
     router.push(`/order-confirmation?${params.toString()}`);
   }
@@ -145,6 +149,22 @@ export default function CheckoutPage() {
 
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-zinc-900">Order summary</h2>
+
+        <ul className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4" data-testid="checkout-order-items">
+          {cartLines.map((line) => (
+            <li key={line.productId} className="flex items-center gap-3 text-sm" data-testid="checkout-order-item">
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-zinc-100">
+                <Image src={line.product.image} alt={line.product.name} fill sizes="48px" className="object-cover" />
+              </div>
+              <div className="flex flex-1 items-center justify-between gap-2">
+                <span className="text-zinc-800">
+                  {line.product.name} <span className="text-zinc-500">x{line.quantity}</span>
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+
         <CartSummary subtotal={subtotal} discount={0} shipping={shipping} total={total} />
       </div>
     </div>

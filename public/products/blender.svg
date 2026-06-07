@@ -1,0 +1,7 @@
+<svg width="320" height="240" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Countertop Blender">
+  <rect width="320" height="240" fill="#92400e" />
+  <circle cx="220" cy="40" r="70" fill="#fbbf24" fill-opacity="0.35" />
+  <circle cx="160" cy="120" r="58" fill="#ffffff" fill-opacity="0.12" />
+  <text x="160" y="134" text-anchor="middle" font-family="Arial, sans-serif" font-size="44" font-weight="700" fill="#ffffff">CB</text>
+  <text x="160" y="222" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" fill-opacity="0.85">Home & Kitchen</text>
+</svg>

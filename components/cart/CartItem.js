@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Button from "@/components/ui/Button";
 import { getEffectivePrice } from "@/lib/pricing";
 
@@ -10,9 +11,14 @@ export default function CartItem({ product, quantity, savedForLater, onIncrease,
       data-testid="cart-item"
       aria-label={product.name}
     >
-      <div>
-        <p className="font-medium text-zinc-900">{product.name}</p>
-        <p className="text-sm text-zinc-600">${getEffectivePrice(product).toFixed(2)} each</p>
+      <div className="flex items-center gap-3">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-zinc-100">
+          <Image src={product.image} alt={product.name} fill sizes="64px" className="object-cover" />
+        </div>
+        <div>
+          <p className="font-medium text-zinc-900">{product.name}</p>
+          <p className="text-sm text-zinc-600">${getEffectivePrice(product).toFixed(2)} each</p>
+        </div>
       </div>
 
       <div className="flex items-center gap-3">
