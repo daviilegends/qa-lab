@@ -1,23 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import { useAuth } from "@/context/AuthContext";
+import { useAccount } from "@/context/AccountContext";
 import { users } from "@/data/users";
-import { findAddressesByUserId } from "@/data/addresses";
-import { findPaymentMethodsByUserId } from "@/data/payments";
-import { findSubscriptionsByUserId } from "@/data/subscriptions";
 import { findProductById } from "@/data/products";
 import { subscriptionFrequencyLabels } from "@/lib/subscriptions";
 
 export default function AccountPage() {
   const { userId, isReady } = useAuth();
+  const { addresses, paymentMethods, subscriptions, cancelSubscription } = useAccount();
   const currentUser = users.find((user) => user.id === userId) ?? null;
-  const [subscriptions, setSubscriptions] = useState(() =>
-    currentUser ? findSubscriptionsByUserId(currentUser.id) : []
-  );
 
   if (isReady && !currentUser) {
     return (
@@ -32,17 +27,6 @@ export default function AccountPage() {
 
   if (!currentUser) {
     return null;
-  }
-
-  const addresses = findAddressesByUserId(currentUser.id);
-  const paymentMethods = findPaymentMethodsByUserId(currentUser.id);
-
-  function handleCancelSubscription(subscriptionId) {
-    setSubscriptions((current) =>
-      current.map((subscription) =>
-        subscription.id === subscriptionId ? { ...subscription, status: "cancelled" } : subscription
-      )
-    );
   }
 
   return (
@@ -79,7 +63,7 @@ export default function AccountPage() {
                       {subscription.status}
                     </Badge>
                     {subscription.status === "active" ? (
-                      <Button variant="secondary" type="button" onClick={() => handleCancelSubscription(subscription.id)} data-testid="cancel-subscription-button">
+                      <Button variant="secondary" type="button" onClick={() => cancelSubscription(subscription.id)} data-testid="cancel-subscription-button">
                         Cancel subscription
                       </Button>
                     ) : null}
@@ -100,8 +84,11 @@ export default function AccountPage() {
         ) : (
           <ul className="flex flex-col gap-2">
             {addresses.map((address) => (
-              <li key={address.id} className="rounded-lg border border-zinc-200 bg-white p-4 text-sm">
-                <p className="font-medium text-zinc-900">{address.label}</p>
+              <li key={address.id} className="rounded-lg border border-zinc-200 bg-white p-4 text-sm" data-testid="account-address-item">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-zinc-900">{address.label}</p>
+                  {address.isPrimary ? <Badge tone="success">Primary</Badge> : null}
+                </div>
                 <p className="text-zinc-600">
                   {address.fullName}, {address.street}, {address.city} {address.postalCode}, {address.country}
                 </p>
@@ -120,8 +107,11 @@ export default function AccountPage() {
         ) : (
           <ul className="flex flex-col gap-2">
             {paymentMethods.map((method) => (
-              <li key={method.id} className="rounded-lg border border-zinc-200 bg-white p-4 text-sm">
-                {method.brand} ending in {method.last4} — expires {method.expiry}
+              <li key={method.id} className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white p-4 text-sm" data-testid="account-payment-item">
+                <span>
+                  {method.brand} ending in {method.last4} — expires {method.expiry}
+                </span>
+                {method.isPrimary ? <Badge tone="success">Primary</Badge> : null}
               </li>
             ))}
           </ul>

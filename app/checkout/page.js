@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
@@ -9,12 +9,12 @@ import Badge from "@/components/ui/Badge";
 import CartSummary from "@/components/cart/CartSummary";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useAccount } from "@/context/AccountContext";
 import { users } from "@/data/users";
 import { findProductById } from "@/data/products";
-import { findAddressesByUserId } from "@/data/addresses";
 import { promotions } from "@/data/promotions";
 import { calculateSubtotal, calculateShipping, roundToCents } from "@/lib/pricing";
-import { authorizePayment, generateOrderNumber } from "@/lib/checkout";
+import { authorizePayment, generateOrderNumber, detectCardBrand, addMonthsToDate } from "@/lib/checkout";
 import { calculateLoyaltyPoints, estimateLoyaltyPoints } from "@/lib/loyalty";
 import LoyaltyBanner from "@/components/loyalty/LoyaltyBanner";
 import { subscriptionFrequencyLabels } from "@/lib/subscriptions";
@@ -26,14 +26,41 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, clearCart } = useCart();
   const { userId } = useAuth();
+  const {
+    isReady: isAccountReady,
+    primaryAddress,
+    primaryPaymentMethod,
+    saveAddress,
+    savePaymentMethod,
+    addSubscription,
+  } = useAccount();
   const currentUser = users.find((user) => user.id === userId) ?? null;
-  const savedAddress = currentUser ? findAddressesByUserId(currentUser.id)[0] : null;
 
-  const [address, setAddress] = useState(savedAddress ?? EMPTY_ADDRESS);
+  const [address, setAddress] = useState(EMPTY_ADDRESS);
   const [card, setCard] = useState(EMPTY_CARD);
+  const [saveAddressAsPrimary, setSaveAddressAsPrimary] = useState(false);
+  const [savePaymentAsPrimary, setSavePaymentAsPrimary] = useState(false);
   const [errors, setErrors] = useState({});
   const [paymentError, setPaymentError] = useState("");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+  useEffect(() => {
+    if (isAccountReady && primaryAddress) {
+      setAddress({
+        fullName: primaryAddress.fullName,
+        street: primaryAddress.street,
+        city: primaryAddress.city,
+        postalCode: primaryAddress.postalCode,
+        country: primaryAddress.country,
+      });
+    }
+  }, [isAccountReady, primaryAddress]);
+
+  useEffect(() => {
+    if (isAccountReady && primaryPaymentMethod) {
+      setCard({ cardNumber: primaryPaymentMethod.cardNumber, expiry: primaryPaymentMethod.expiry, cvc: "" });
+    }
+  }, [isAccountReady, primaryPaymentMethod]);
 
   const cartLines = items
     .filter((item) => !item.savedForLater)
@@ -93,6 +120,31 @@ export default function CheckoutPage() {
       .map((line) => `${line.productId}:${line.quantity}:${line.subscription?.frequency ?? 0}`)
       .join(",");
 
+    if (saveAddressAsPrimary) {
+      saveAddress({ label: "Checkout address", ...address }, { makePrimary: true });
+    }
+    if (savePaymentAsPrimary) {
+      savePaymentMethod(
+        {
+          brand: detectCardBrand(card.cardNumber),
+          last4: card.cardNumber.trim().slice(-4),
+          cardNumber: card.cardNumber.trim(),
+          expiry: card.expiry,
+        },
+        { makePrimary: true }
+      );
+    }
+    cartLines
+      .filter((line) => line.subscription)
+      .forEach((line) => {
+        addSubscription({
+          productId: line.productId,
+          frequencyMonths: line.subscription.frequency,
+          startedOn: orderDate,
+          nextDeliveryOn: addMonthsToDate(orderDate, line.subscription.frequency),
+        });
+      });
+
     clearCart();
     const params = new URLSearchParams({
       orderNumber,
@@ -126,6 +178,19 @@ export default function CheckoutPage() {
             <Input id="postalCode" label="Postal code" value={address.postalCode} onChange={(e) => updateAddressField("postalCode", e.target.value)} error={errors.postalCode} data-testid="address-postal-input" />
             <Input id="country" label="Country" value={address.country} onChange={(e) => updateAddressField("country", e.target.value)} error={errors.country} data-testid="address-country-input" />
           </div>
+          {currentUser ? (
+            <label htmlFor="save-address-primary" className="flex items-center gap-2 text-sm text-zinc-700">
+              <input
+                id="save-address-primary"
+                type="checkbox"
+                checked={saveAddressAsPrimary}
+                onChange={(e) => setSaveAddressAsPrimary(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 text-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+                data-testid="save-address-primary-checkbox"
+              />
+              Save this address as my primary address
+            </label>
+          ) : null}
         </section>
 
         <section aria-labelledby="payment-heading" className="flex flex-col gap-4 rounded-lg border border-zinc-200 bg-white p-4">
@@ -140,6 +205,20 @@ export default function CheckoutPage() {
             <Input id="expiry" label="Expiry (MM/YY)" placeholder="12/29" value={card.expiry} onChange={(e) => updateCardField("expiry", e.target.value)} error={errors.expiry} data-testid="card-expiry-input" />
             <Input id="cvc" label="Security code" inputMode="numeric" value={card.cvc} onChange={(e) => updateCardField("cvc", e.target.value)} error={errors.cvc} data-testid="card-cvc-input" />
           </div>
+
+          {currentUser ? (
+            <label htmlFor="save-payment-primary" className="flex items-center gap-2 text-sm text-zinc-700">
+              <input
+                id="save-payment-primary"
+                type="checkbox"
+                checked={savePaymentAsPrimary}
+                onChange={(e) => setSavePaymentAsPrimary(e.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300 text-brand-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+                data-testid="save-payment-primary-checkbox"
+              />
+              Save this card as my primary payment method
+            </label>
+          ) : null}
 
           {paymentError ? (
             <p role="alert" className="text-sm text-red-600" data-testid="payment-error">

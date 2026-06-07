@@ -2,6 +2,7 @@ import { Poppins, Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
+import { AccountProvider } from "@/context/AccountContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
@@ -29,11 +30,13 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <CartProvider>
-            <Header />
-            <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
-            <Footer />
-          </CartProvider>
+          <AccountProvider>
+            <CartProvider>
+              <Header />
+              <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">{children}</main>
+              <Footer />
+            </CartProvider>
+          </AccountProvider>
         </AuthProvider>
       </body>
     </html>
