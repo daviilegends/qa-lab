@@ -4,16 +4,25 @@ import { use } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import LoyaltyBanner from "@/components/loyalty/LoyaltyBanner";
 import { findProductById } from "@/data/products";
+import { subscriptionFrequencyLabels } from "@/lib/subscriptions";
 
 function parseOrderItems(itemsParam) {
   if (!itemsParam) return [];
   return itemsParam
     .split(",")
     .map((entry) => {
-      const [productId, quantity] = entry.split(":");
+      const [productId, quantity, frequency] = entry.split(":");
       const product = findProductById(productId);
-      return product ? { product, quantity: Number(quantity) || 1 } : null;
+      if (!product) return null;
+      const frequencyNumber = Number(frequency) || 0;
+      return {
+        product,
+        quantity: Number(quantity) || 1,
+        subscription: frequencyNumber > 0 ? { frequency: frequencyNumber } : null,
+      };
     })
     .filter(Boolean);
 }
@@ -53,16 +62,31 @@ export default function OrderConfirmationPage({ searchParams }) {
         </div>
       </dl>
 
+      <LoyaltyBanner
+        testId="confirmation-points-banner"
+        title={`You earned ${points} loyalty points`}
+        message="Points have been added to your account balance and can be redeemed on future orders."
+      />
+
       {orderItems.length > 0 ? (
         <ul className="flex w-full flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4 text-left" data-testid="confirmation-order-items">
-          {orderItems.map(({ product, quantity }) => (
+          {orderItems.map(({ product, quantity, subscription }) => (
             <li key={product.id} className="flex items-center gap-3 text-sm" data-testid="confirmation-order-item">
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-zinc-100">
                 <Image src={product.image} alt={product.name} fill sizes="48px" className="object-cover" />
               </div>
-              <span className="text-zinc-800">
-                {product.name} <span className="text-zinc-500">x{quantity}</span>
-              </span>
+              <div className="flex flex-col gap-1">
+                <span className="text-zinc-800">
+                  {product.name} <span className="text-zinc-500">x{quantity}</span>
+                </span>
+                {subscription ? (
+                  <span data-testid="confirmation-item-subscription">
+                    <Badge tone="warning">
+                      Subscribed — {subscriptionFrequencyLabels[subscription.frequency]}
+                    </Badge>
+                  </span>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>

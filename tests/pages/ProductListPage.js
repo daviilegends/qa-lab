@@ -2,9 +2,15 @@ export class ProductListPage {
   constructor(page) {
     this.page = page;
     this.searchInput = page.getByLabel("Search products");
-    this.categorySelect = page.getByLabel("Category");
+    // The page also has a "Shop by category" nav landmark, whose accessible
+    // name contains "category" — getByLabel("Category") would strict-mode
+    // violate against it, so target the filter select by its stable test id.
+    this.categorySelect = page.getByTestId("category-filter-select");
     this.sortSelect = page.getByLabel("Sort by");
-    this.productCards = page.getByTestId("product-card");
+    // Scoped to the "All products" grid — the page also has a "Popular products"
+    // row that reuses ProductCard, so an unscoped lookup would over-count.
+    this.productGrid = page.getByTestId("product-grid");
+    this.productCards = this.productGrid.getByTestId("product-card");
   }
 
   async goto() {
@@ -16,10 +22,9 @@ export class ProductListPage {
   }
 
   async openProduct(productName) {
-    await this.page
-      .getByTestId("product-card")
+    await this.productCards
       .filter({ hasText: productName })
-      .getByRole("link", { name: "View details" })
+      .getByTestId("view-details-link")
       .click();
   }
 }

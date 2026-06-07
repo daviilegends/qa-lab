@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
 import { getEffectivePrice } from "@/lib/pricing";
+import { subscriptionFrequencyLabels, getSubscriptionPrice } from "@/lib/subscriptions";
 
-export default function CartItem({ product, quantity, savedForLater, onIncrease, onDecrease, onRemove, onSaveForLater, onMoveToCart }) {
+export default function CartItem({ product, quantity, savedForLater, subscription, onIncrease, onDecrease, onRemove, onSaveForLater, onMoveToCart }) {
   const lineTotal = getEffectivePrice(product) * quantity;
 
   return (
@@ -18,6 +20,13 @@ export default function CartItem({ product, quantity, savedForLater, onIncrease,
         <div>
           <p className="font-medium text-zinc-900">{product.name}</p>
           <p className="text-sm text-zinc-600">${getEffectivePrice(product).toFixed(2)} each</p>
+          {subscription ? (
+            <p className="mt-1" data-testid="cart-item-subscription">
+              <Badge tone="warning">
+                Subscribed — {subscriptionFrequencyLabels[subscription.frequency]} at ${getSubscriptionPrice(product).toFixed(2)} each
+              </Badge>
+            </p>
+          ) : null}
         </div>
       </div>
 

@@ -7,8 +7,13 @@ import Button from "@/components/ui/Button";
 import StockBadge from "@/components/product/StockBadge";
 import Badge from "@/components/ui/Badge";
 import { findProductById } from "@/data/products";
+import { users } from "@/data/users";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { subscriptionFrequencyLabels, getSubscriptionPrice } from "@/lib/subscriptions";
+import { getEffectivePrice } from "@/lib/pricing";
+import { estimateLoyaltyPoints } from "@/lib/loyalty";
+import LoyaltyBanner from "@/components/loyalty/LoyaltyBanner";
 
 export default function ProductDetailsPage({ params }) {
   const { id } = use(params);
@@ -19,6 +24,8 @@ export default function ProductDetailsPage({ params }) {
   }
 
   const { addItem } = useCart();
+  const { userId } = useAuth();
+  const currentUser = users.find((user) => user.id === userId) ?? null;
   const [quantity, setQuantity] = useState(1);
   const [wantsSubscription, setWantsSubscription] = useState(false);
   const [frequency, setFrequency] = useState(product.subscriptionFrequencies?.[0] ?? 1);
@@ -32,7 +39,10 @@ export default function ProductDetailsPage({ params }) {
   }
 
   function handleSubscribe() {
-    setFeedback(`Subscribed to ${product.name} (${subscriptionFrequencyLabels[frequency]}).`);
+    addItem(product.id, quantity, { subscription: { frequency } });
+    setFeedback(
+      `Subscribed to ${product.name} (${subscriptionFrequencyLabels[frequency]}) and added it to your cart.`
+    );
   }
 
   return (
@@ -71,6 +81,17 @@ export default function ProductDetailsPage({ params }) {
             </span>
           )}
         </div>
+
+        <LoyaltyBanner
+          testId="pdp-points-banner"
+          title={`Earn ${estimateLoyaltyPoints(currentUser, getEffectivePrice(product) * quantity)} loyalty points`}
+          message={`Buying ${quantity} x ${product.name} now earns you points toward future discounts.`}
+          footnote={
+            currentUser?.state === "subscribed"
+              ? "Subscriber bonus rate applied — you earn extra points per dollar."
+              : "Subscribe to this product to boost your points rate."
+          }
+        />
 
         <div className="flex items-end gap-3">
           <div className="flex flex-col gap-1">

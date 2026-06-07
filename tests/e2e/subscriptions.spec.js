@@ -13,7 +13,9 @@ test.describe("Subscription checkout @subscriptions", () => {
     const pdp = new ProductDetailsPage(page);
     await pdp.subscribeWithFrequency(2);
 
-    await expect(pdp.feedback).toHaveText("Subscribed to Whey Protein Powder 1kg (Every 2 months).");
+    await expect(pdp.feedback).toHaveText(
+      "Subscribed to Whey Protein Powder 1kg (Every 2 months) and added it to your cart."
+    );
   });
 
   test("a non-subscription product does not show a subscribe option", async ({ page }) => {

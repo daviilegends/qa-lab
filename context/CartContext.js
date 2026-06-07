@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 const CartContext = createContext(null);
 const STORAGE_KEY = "minicommerce.cart.items";
 
-// Each item: { productId, quantity, savedForLater }
+// Each item: { productId, quantity, savedForLater, subscription: { frequency } | null }
 function readStoredItems() {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -30,15 +30,18 @@ export function CartProvider({ children }) {
     }
   }, [items, isReady]);
 
-  function addItem(productId, quantity = 1) {
+  function addItem(productId, quantity = 1, options = {}) {
+    const subscription = options.subscription ?? null;
     setItems((current) => {
       const existing = current.find((item) => item.productId === productId && !item.savedForLater);
       if (existing) {
         return current.map((item) =>
-          item === existing ? { ...item, quantity: item.quantity + quantity } : item
+          item === existing
+            ? { ...item, quantity: item.quantity + quantity, subscription: subscription ?? item.subscription ?? null }
+            : item
         );
       }
-      return [...current, { productId, quantity, savedForLater: false }];
+      return [...current, { productId, quantity, savedForLater: false, subscription }];
     });
   }
 

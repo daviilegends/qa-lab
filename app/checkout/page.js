@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Badge from "@/components/ui/Badge";
 import CartSummary from "@/components/cart/CartSummary";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -14,7 +15,9 @@ import { findAddressesByUserId } from "@/data/addresses";
 import { promotions } from "@/data/promotions";
 import { calculateSubtotal, calculateShipping, roundToCents } from "@/lib/pricing";
 import { authorizePayment, generateOrderNumber } from "@/lib/checkout";
-import { calculateLoyaltyPoints } from "@/lib/loyalty";
+import { calculateLoyaltyPoints, estimateLoyaltyPoints } from "@/lib/loyalty";
+import LoyaltyBanner from "@/components/loyalty/LoyaltyBanner";
+import { subscriptionFrequencyLabels } from "@/lib/subscriptions";
 
 const EMPTY_ADDRESS = { fullName: "", street: "", city: "", postalCode: "", country: "" };
 const EMPTY_CARD = { cardNumber: "", expiry: "", cvc: "" };
@@ -40,6 +43,7 @@ export default function CheckoutPage() {
   const subtotal = useMemo(() => roundToCents(calculateSubtotal(cartLines)), [cartLines]);
   const shipping = useMemo(() => calculateShipping(subtotal, promotions.freeShippingThreshold), [subtotal]);
   const total = useMemo(() => roundToCents(subtotal + shipping), [subtotal, shipping]);
+  const projectedPoints = useMemo(() => estimateLoyaltyPoints(currentUser, total), [currentUser, total]);
 
   function updateAddressField(field, value) {
     setAddress((current) => ({ ...current, [field]: value }));
@@ -85,7 +89,9 @@ export default function CheckoutPage() {
     const orderNumber = generateOrderNumber();
     const loyaltyPointsEarned = calculateLoyaltyPoints({ user: currentUser, orderTotal: total, orderDate });
 
-    const itemsSummary = cartLines.map((line) => `${line.productId}:${line.quantity}`).join(",");
+    const itemsSummary = cartLines
+      .map((line) => `${line.productId}:${line.quantity}:${line.subscription?.frequency ?? 0}`)
+      .join(",");
 
     clearCart();
     const params = new URLSearchParams({
@@ -150,16 +156,31 @@ export default function CheckoutPage() {
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold text-zinc-900">Order summary</h2>
 
+        {currentUser ? (
+          <LoyaltyBanner
+            testId="checkout-points-banner"
+            title={`Placing this order earns ~${projectedPoints} loyalty points`}
+            message={`Your balance is currently ${currentUser.loyaltyPoints} points.`}
+          />
+        ) : null}
+
         <ul className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-white p-4" data-testid="checkout-order-items">
           {cartLines.map((line) => (
             <li key={line.productId} className="flex items-center gap-3 text-sm" data-testid="checkout-order-item">
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-zinc-100">
                 <Image src={line.product.image} alt={line.product.name} fill sizes="48px" className="object-cover" />
               </div>
-              <div className="flex flex-1 items-center justify-between gap-2">
+              <div className="flex flex-1 flex-col gap-1">
                 <span className="text-zinc-800">
                   {line.product.name} <span className="text-zinc-500">x{line.quantity}</span>
                 </span>
+                {line.subscription ? (
+                  <span data-testid="checkout-item-subscription">
+                    <Badge tone="warning">
+                      Subscribed — {subscriptionFrequencyLabels[line.subscription.frequency]}
+                    </Badge>
+                  </span>
+                ) : null}
               </div>
             </li>
           ))}

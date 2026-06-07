@@ -12,6 +12,9 @@
   --color-brand-700: #047857;
   --color-brand-900: #064e3b;
 
+  --color-cta-50: #fff7ed;
+  --color-cta-100: #ffedd5;
+  --color-cta-200: #fed7aa;
   --color-cta-500: #f97316;
   --color-cta-600: #ea580c;
 }
@@ -24,6 +27,9 @@
   --color-brand-600: var(--color-brand-600);
   --color-brand-700: var(--color-brand-700);
   --color-brand-900: var(--color-brand-900);
+  --color-cta-50: var(--color-cta-50);
+  --color-cta-100: var(--color-cta-100);
+  --color-cta-200: var(--color-cta-200);
   --color-cta-500: var(--color-cta-500);
   --color-cta-600: var(--color-cta-600);
   --font-sans: var(--font-body);

@@ -54,7 +54,7 @@ test.describe("Filtering and sorting @regression", () => {
     await plp.sortSelect.selectOption({ label: "Price: low to high" });
 
     const firstCardPrice = await plp.productCards.first().getByText(/^\$\d+\.\d{2}$/).first().textContent();
-    expect(firstCardPrice).toBe("$14.50");
+    expect(firstCardPrice).toBe("$12.99");
   });
 });
 

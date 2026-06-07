@@ -14,6 +14,10 @@ import CartItem from "@/components/cart/CartItem";
 import CartSummary from "@/components/cart/CartSummary";
 import CouponForm from "@/components/cart/CouponForm";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import LoyaltyBanner from "@/components/loyalty/LoyaltyBanner";
+import { estimateLoyaltyPoints } from "@/lib/loyalty";
+import { subscriptionFrequencyLabels } from "@/lib/subscriptions";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, saveForLater, moveToCart } = useCart();
@@ -44,6 +48,9 @@ export default function CartPage() {
   }, [subtotal, appliedCoupon]);
 
   const total = useMemo(() => roundToCents(Math.max(0, subtotal - discount + shipping)), [subtotal, discount, shipping]);
+
+  const projectedPoints = useMemo(() => estimateLoyaltyPoints(currentUser, total), [currentUser, total]);
+  const subscribedLines = activeLines.filter((line) => line.subscription);
 
   function handleApplyCoupon(code) {
     if (!code.trim()) {
@@ -89,6 +96,31 @@ export default function CartPage() {
           <h1 className="text-2xl font-semibold text-zinc-900">Your cart</h1>
         </div>
 
+        {currentUser ? (
+          <LoyaltyBanner
+            testId="cart-points-banner"
+            title={`This order earns ~${projectedPoints} loyalty points`}
+            message={`You currently have ${currentUser.loyaltyPoints} points — checking out adds to your balance.`}
+          />
+        ) : null}
+
+        {subscribedLines.length > 0 ? (
+          <div
+            className="flex flex-col gap-2 rounded-lg border border-brand-100 bg-brand-50 p-4"
+            data-testid="cart-subscription-summary"
+          >
+            <p className="font-heading text-sm font-semibold text-brand-700">Active subscriptions in this order</p>
+            <ul className="flex flex-col gap-1.5">
+              {subscribedLines.map((line) => (
+                <li key={line.productId} className="flex items-center gap-2 text-sm text-zinc-700">
+                  <Badge tone="warning">{subscriptionFrequencyLabels[line.subscription.frequency]}</Badge>
+                  {line.product.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
         {activeLines.length > 0 ? (
           <ul className="flex flex-col gap-3" aria-label="Cart items">
             {activeLines.map((line) => (
@@ -96,6 +128,7 @@ export default function CartPage() {
                 key={line.productId}
                 product={line.product}
                 quantity={line.quantity}
+                subscription={line.subscription}
                 savedForLater={false}
                 onIncrease={() => updateQuantity(line.productId, line.quantity + 1)}
                 onDecrease={() => updateQuantity(line.productId, line.quantity - 1)}
